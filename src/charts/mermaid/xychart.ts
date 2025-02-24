@@ -51,13 +51,26 @@ export class XYChart extends BaseChart {
         continue;
       }
 
-      const dataMatch = line.match(/^\s*(\w+)\s+([0-9\s.]+)/);
+      const dataMatch = line.match(/^\s*(\w+)\s*$/);
       if (dataMatch) {
         currentSeries = {
           type: dataMatch[1],
-          data: dataMatch[2].trim().split(/\s+/).map(Number),
+          data: [],
         };
         result.series.push(currentSeries);
+        continue;
+      }
+
+      // 处理数据点
+      if (currentSeries) {
+        const pointMatch = line.match(
+          /^\s*(\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\s*$/
+        );
+        if (pointMatch) {
+          const x = Number(pointMatch[1]);
+          const y = Number(pointMatch[2]);
+          currentSeries.data.push(y);
+        }
       }
     }
 
