@@ -1,34 +1,33 @@
-import { BaseChart } from './charts/base';
-import { XYChart } from './charts/mermaid/xychart';
-import type { EChartsOption } from 'echarts';
+import { PieParser } from './parsers/pie';
+import { PieChart } from './charts/pie';
+import type { ChartDefinition } from './parsers/base';
 
-export class EChartsMermaid {
-  /**
-   * Converts a Mermaid diagram definition to an ECharts option
-   * @param {string} mermaidDefinition The Mermaid diagram definition string
-   * @returns {EChartsOption} ECharts option object
-   */
-  static getOption(mermaidDefinition: string): EChartsOption {
-    const chartType = this.detectChartType(mermaidDefinition);
-    const chart = this.createChart(chartType, mermaidDefinition);
+type ChartType = 'pie';
+
+export class EChartsFromMermaid {
+  static getOption(definition: string) {
+    // 1. Parse mermaid text
+    const firstLine = definition.trim().split('\n')[0];
+    const type = firstLine.split(/\s+/)[0];
+    const parser = this.getParser(type as ChartType);
+    const chartDef = parser.parse(definition);
+
+    // 2. Convert to ECharts option
+    const chart = this.getChart(type as ChartType, chartDef);
     return chart.getOption();
   }
 
-  private static detectChartType(definition: string): string {
-    if (definition.includes('xychart-beta')) {
-      return 'xychart-beta';
-    }
-    throw new Error('Unsupported chart type');
+  private static getParser(type: ChartType) {
+    const parsers: Record<ChartType, PieParser> = {
+      pie: new PieParser(),
+    };
+    return parsers[type];
   }
 
-  private static createChart(type: string, definition: string): BaseChart {
-    switch (type) {
-      case 'xychart-beta':
-        return new XYChart(definition);
-      default:
-        throw new Error('Unsupported chart type');
-    }
+  private static getChart(type: ChartType, chartDef: ChartDefinition) {
+    const charts: Record<ChartType, PieChart> = {
+      pie: new PieChart(chartDef),
+    };
+    return charts[type];
   }
 }
-
-export default EChartsMermaid;
