@@ -1,6 +1,6 @@
-import { BaseChart } from './base';
 import type { EChartsOption } from 'echarts';
-import type { ChartDefinition } from '../parsers/base';
+import type { ChartDefinition } from '../../types';
+import { BaseChart } from '../../base/BaseChart';
 
 export class PieChart extends BaseChart {
   constructor(definition: ChartDefinition) {
@@ -9,9 +9,7 @@ export class PieChart extends BaseChart {
 
   getOption(): EChartsOption {
     return {
-      title: this.definition.title
-        ? { text: this.definition.title }
-        : undefined,
+      ...this.getBaseOption(),
       series: [
         {
           type: 'pie',

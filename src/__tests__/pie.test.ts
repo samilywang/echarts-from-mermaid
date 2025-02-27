@@ -1,4 +1,4 @@
-import { EChartsFromMermaid } from '../../index';
+import { EChartsFromMermaid } from '../index';
 
 describe('Pie Chart', () => {
   it('should parse basic pie chart correctly', () => {

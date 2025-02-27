@@ -1,4 +1,5 @@
-import { BaseParser, ChartDefinition } from './base';
+import { BaseParser } from '../../base/BaseParser';
+import type { ChartDefinition } from '../../types';
 
 export class PieParser extends BaseParser {
   parse(definition: string): ChartDefinition {
