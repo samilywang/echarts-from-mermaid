@@ -1,10 +1,16 @@
-export type ChartType = 'xychart-beta' | 'pie';
+import type {
+  SeriesOption,
+  XAXisComponentOption,
+  YAXisComponentOption,
+} from 'echarts';
+
+export type ChartType = 'pie' | 'xychart' | 'xychart-beta';
 
 export interface ChartDefinition {
   type: string;
   title?: string;
-  data: Array<{
-    name: string;
-    value: number;
-  }>;
+  data: any[];
+  series: SeriesOption[];
+  xAxis?: XAXisComponentOption;
+  yAxis?: YAXisComponentOption;
 }

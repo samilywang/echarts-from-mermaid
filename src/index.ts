@@ -1,10 +1,8 @@
 import { PieParser } from './mermaid/pie/PieParser';
 import { PieChart } from './mermaid/pie/PieChart';
-import type { ChartDefinition } from './types';
+import type { ChartDefinition, ChartType } from './types';
 import { XYChartParser } from './mermaid/xy/XYChartParser';
 import { XYChart } from './mermaid/xy/XYChart';
-
-type ChartType = 'pie' | 'xychart-beta';
 
 export class EChartsFromMermaid {
   static getOption(definition: string) {
@@ -22,6 +20,7 @@ export class EChartsFromMermaid {
   private static getParser(type: ChartType) {
     const parsers: Record<ChartType, PieParser | XYChartParser> = {
       pie: new PieParser(),
+      xychart: new XYChartParser(),
       'xychart-beta': new XYChartParser(),
     };
     return parsers[type];
@@ -30,6 +29,7 @@ export class EChartsFromMermaid {
   private static getChart(type: ChartType, chartDef: ChartDefinition) {
     const charts: Record<ChartType, PieChart | XYChart> = {
       pie: new PieChart(chartDef),
+      xychart: new XYChart(chartDef),
       'xychart-beta': new XYChart(chartDef),
     };
     return charts[type];
