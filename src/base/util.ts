@@ -7,7 +7,7 @@
 
 export type ParseArrayResult = {
   type: 'category' | 'value';
-  categories?: string[];
+  data?: string[];
   min?: number;
   max?: number;
 };
@@ -24,7 +24,7 @@ export function parseArray(str: string): ParseArrayResult {
 
   return {
     type: 'category',
-    categories: str
+    data: str
       .replace(/^\[|\]$/g, '')
       .split(',')
       .map((s) => s.trim())

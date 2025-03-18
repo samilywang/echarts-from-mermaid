@@ -4,6 +4,7 @@ import { XYChart } from './mermaid/xy/XYChart';
 
 export class EChartsFromMermaid {
   static getOption(definition: string) {
+    console.log('definition', definition);
     const firstLine = definition.trim().split('\n')[0];
     const type = firstLine.split(/\s+/)[0];
     const chart = this.getChart(type as ChartType, definition);

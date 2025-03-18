@@ -6,7 +6,7 @@ export abstract class BaseChart {
 
   constructor(definition: string) {
     this._definition = definition.trim();
-    this._lines = this._definition.split('\n');
+    this._lines = this._definition.split('\n').map((line) => line.trim());
   }
 
   /**
@@ -40,7 +40,7 @@ export abstract class BaseChart {
     for (let i = 1; i < this._lines.length; i++) {
       // It should be like: "apples" : 100
       // The quotes are not optional
-      const line = this._lines[i].trim();
+      const line = this._lines[i];
       if (line.startsWith('"')) {
         const splits = line.split(':');
         if (splits.length > 1) {
