@@ -1,9 +1,8 @@
 import type { EChartsOption } from 'echarts';
-import type { ChartDefinition } from '../../types';
 import { BaseChart } from '../../base/BaseChart';
 
 export class PieChart extends BaseChart {
-  constructor(definition: ChartDefinition) {
+  constructor(definition: string) {
     super(definition);
   }
 
@@ -13,7 +12,7 @@ export class PieChart extends BaseChart {
       series: [
         {
           type: 'pie',
-          data: this.definition.data,
+          data: this.getData1d(),
         },
       ],
     };

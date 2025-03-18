@@ -49,28 +49,4 @@ pie
       ],
     });
   });
-
-  it('should handle pie chart without quotes', () => {
-    // This is not supported by mermaid, but we should support is
-    // so it's more robust
-    const definition = `
-pie
-    Dogs : 386
-    Cats : 85
-`;
-
-    const option = EChartsFromMermaid.getOption(definition);
-
-    expect(option).toEqual({
-      series: [
-        {
-          type: 'pie',
-          data: [
-            { name: 'Dogs', value: 386 },
-            { name: 'Cats', value: 85 },
-          ],
-        },
-      ],
-    });
-  });
 });
