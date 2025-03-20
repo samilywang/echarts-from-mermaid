@@ -47,11 +47,13 @@ chart.setOption(option);
 
 ## Supported Charts
 
+Note that the supported charts are neither a subset nor a superset of the charts supported by Mermaid. This plugin is designed to generate ECharts Options in a syntax that is inspired by Mermaid.
+
 ### Mermaid
 
 - Pie (`pie`)
-- Bar (`xychart-beta`)
-- Line (`xychart-beta`)
+- Bar (`xychart-beta`, or simplified as `xychart`)
+- Line (`xychart-beta`, or simplified as `xychart`)
 - Sankey (`sankey-beta`)
 
 ### Extended
