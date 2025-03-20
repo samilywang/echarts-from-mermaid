@@ -1,7 +1,5 @@
 # Apache ECharts From Mermaid
 
-> ⚠️⚠️⚠️ **Note:** This project is still under development and should not be used in production.
-
 A plugin that enables Apache ECharts to render charts using Mermaid-like syntax.
 
 This plugin is particularly useful when you want to generate charts from text/markdown, especially in LLM applications. Instead of having LLMs generate complex ECharts options directly, you can use this plugin to convert simpler Mermaid-like syntax into ECharts options. This approach is more reliable since Mermaid syntax is much simpler than ECharts' option structure.
@@ -49,13 +47,8 @@ chart.setOption(option);
 
 Note that the supported charts are neither a subset nor a superset of the charts supported by Mermaid. This plugin is designed to generate ECharts Options in a syntax that is inspired by Mermaid.
 
-### Mermaid
-
 - Pie (`pie`)
 - Bar (`xychart-beta`, or simplified as `xychart`)
 - Line (`xychart-beta`, or simplified as `xychart`)
-- Sankey (`sankey-beta`)
 
-### Extended
-
-Mermaid doesn't support the following types, but we used Mermaid-like syntax to describe these types supported by Apache ECharts.
+More chart types will be supported in the future.
