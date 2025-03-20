@@ -1,9 +1,9 @@
-import { AxisDefinition, parseAxis } from '../../base/parseAxis';
-import { BaseChart } from '../../base/BaseChart';
 import type { EChartsOption, LineSeriesOption, BarSeriesOption } from 'echarts';
+import { parseAxis } from '../../base/parseAxis';
+import { convert2dData } from '../../base/util';
+import { BaseChart } from '../../base/BaseChart';
 
 const xySeriesTypes = ['line', 'bar'];
-const axisTypes = ['x-axis', 'y-axis'];
 
 export class XYChart extends BaseChart {
   getOption(): EChartsOption {
@@ -14,22 +14,18 @@ export class XYChart extends BaseChart {
 
     for (; lineId < this._lines.length; lineId++) {
       const line = this._lines[lineId];
-      console.log('line', line);
 
       if (line.indexOf('horizontal') > 0) {
         isHorizontal = true;
       }
 
       const axisDef = parseAxis(line);
-      console.log('-----', isHorizontal, axisDef);
       if (axisDef) {
         const { key, ...rest } = axisDef;
         if ((key === 'x' && !isHorizontal) || (key === 'y' && isHorizontal)) {
           xAxis = rest;
-          console.log('========= xAxis', xAxis);
         } else {
           yAxis = rest;
-          console.log('========= yAxis', yAxis);
         }
       } else if (lineId > 0) {
         break;
@@ -46,23 +42,36 @@ export class XYChart extends BaseChart {
           try {
             let data = JSON.parse(dataStr);
 
-            // If xAxis and yAxis are not defined, convert data into:
-            // [[1, data[0]], [2, data[1]], [3, data[2]]], ...
-            if (!xAxis && !yAxis) {
-              data = data.map((d: number, i: number) =>
-                isHorizontal ? [d, i + 1] : [i + 1, d]
-              );
+            const valueAxis = isHorizontal ? xAxis : yAxis;
+            if (valueAxis && valueAxis.type === 'category') {
+              throw new Error('Category axis is not supported for value axis.');
             }
-            console.log('data', data);
 
-            // TODO: double value axes
+            // Case 1: xAxis: null, yAxis: any
+            // -> xAxis: value axis with min(1) and max(data.length),
+            // -> yAxis: value axis without/with min and max
+            // -> data: [[1, data[0]], ... [data.length, data[data.length - 1]]]
+            if (!xAxis) {
+              data = convert2dData(1, data.length, data, isHorizontal);
+            }
+            // Case 2: xAxis: value axis with min and max, yAxis: any
+            // -> xAxis: value axis with min and max,
+            // -> yAxis: value axis without/with min and max
+            // -> data: [[xAxis.min, data[0]], ... [xAxis.max, data[data.length - 1]]]
+            else if (xAxis && xAxis.max != null && xAxis.min != null) {
+              data = convert2dData(xAxis.min, xAxis.max, data, isHorizontal);
+            }
+            // Case 3: xAxis: category, yAxis: null
+            // -> xAxis: category axis
+            // -> yAxis: value axis
+            // -> data: data (not changed)
 
             series.push({
               type: type as 'line' | 'bar',
               data,
             });
           } catch (e) {
-            console.error(`Error parsing data for ${type}: ${dataStr}`);
+            console.error(`Error parsing data for ${type}: ${dataStr}`, e);
           }
         }
       }

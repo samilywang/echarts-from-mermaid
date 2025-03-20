@@ -12,7 +12,6 @@ export interface AxisDefinition {
 const axisKeys = ['x', 'y'] as const;
 
 export function parseAxis(line: string): AxisDefinition | null {
-  console.log('parseAxis', line);
   let key: 'x' | 'y' | undefined;
   for (const axisKey of axisKeys) {
     if (line.startsWith(axisKey + '-axis')) {
@@ -31,9 +30,9 @@ export function parseAxis(line: string): AxisDefinition | null {
    * y-axis "Time trained (minutes)" 0 --> 300
    */
   const rest = line.substring((key + '-axis').length).trim();
-  const titleRe = /^\s*"[^"]*"\s+/.exec(rest);
-  const title = titleRe ? titleRe[0].trim() : undefined;
-  const data = title ? rest.substring(title.length) : rest;
+  const titleRe = /^\s*"([^"]*)"\s+/.exec(rest);
+  const title = titleRe ? titleRe[1] : undefined;
+  const data = titleRe ? rest.substring(titleRe[0].length) : rest;
 
   const arrayResult = parseArray(data);
   const result: AxisDefinition = {

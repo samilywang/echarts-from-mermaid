@@ -6,7 +6,7 @@ describe('parseAxis', () => {
     expect(axis).toEqual({
       key: 'x',
       type: 'category',
-      categories: ['cat1', 'cat2', 'cat3'],
+      data: ['cat1', 'cat2', 'cat3'],
     });
   });
 
@@ -15,7 +15,7 @@ describe('parseAxis', () => {
     expect(axis).toEqual({
       key: 'x',
       type: 'category',
-      categories: ['cat1', 'cat2', 'cat3'],
+      data: ['cat1', 'cat2', 'cat3'],
     });
   });
 
@@ -35,7 +35,7 @@ describe('parseAxis', () => {
       key: 'x',
       type: 'category',
       name: 'Title',
-      categories: ['cat1', 'cat2', 'cat3'],
+      data: ['cat1', 'cat2', 'cat3'],
     });
   });
 
