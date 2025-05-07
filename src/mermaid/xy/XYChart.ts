@@ -1,85 +1,108 @@
-import type { EChartsOption, LineSeriesOption, BarSeriesOption } from 'echarts';
+import type {
+  EChartsOption,
+  LineSeriesOption,
+  BarSeriesOption,
+  TitleComponentOption,
+} from 'echarts';
 import { parseAxis } from '../../base/parseAxis';
-import { convert2dData } from '../../base/util';
+import { parseLegend, parseTitle } from '../../base/util';
 import { BaseChart } from '../../base/BaseChart';
 
-const xySeriesTypes = ['line', 'bar'];
+// mermaid xychart code line type
+enum XYChartLineType {
+  title = 'title',
+  xAxis = 'x-axis',
+  yAxis = 'y-axis',
+  line = 'line',
+  bar = 'bar',
+  legend = 'legend',
+}
 
 export class XYChart extends BaseChart {
   getOption(): EChartsOption {
+    let title: TitleComponentOption | undefined;
     let lineId = 0;
     let xAxis;
-    let yAxis;
-    let isHorizontal = false;
+    const yAxis = [];
+    // let isHorizontal = false;
+    const seriesLines: { type: 'line' | 'bar'; str: string }[] = [];
+    let legends: string[] = [];
 
+    // parse lines
     for (; lineId < this._lines.length; lineId++) {
-      const line = this._lines[lineId];
+      const line = this._lines[lineId].trim();
 
-      if (line.indexOf('horizontal') > 0) {
-        isHorizontal = true;
-      }
+      // if (line.indexOf('horizontal') > 0) {
+      //   isHorizontal = true;
+      //   continue;09
+      // }
 
-      const axisDef = parseAxis(line);
-      if (axisDef) {
-        const { key, ...rest } = axisDef;
-        if ((key === 'x' && !isHorizontal) || (key === 'y' && isHorizontal)) {
-          xAxis = rest;
-        } else {
-          yAxis = rest;
-        }
-      } else if (lineId > 0) {
-        break;
+      const lineType = line.split(' ')[0];
+      switch (lineType) {
+        case XYChartLineType.title:
+          title = {
+            show: false,
+            text: parseTitle(line),
+          };
+          break;
+        case XYChartLineType.xAxis:
+          xAxis = parseAxis(line);
+          break;
+        case XYChartLineType.yAxis:
+          yAxis.push(parseAxis(line));
+          break;
+        case XYChartLineType.bar:
+          seriesLines.push({ type: 'bar', str: line });
+          break;
+        case XYChartLineType.line:
+          seriesLines.push({ type: 'line', str: line });
+          break;
+        case XYChartLineType.legend:
+          legends = parseLegend(line);
+          break;
       }
     }
 
+    // // if horizontal, swap xAxis and yAxis
+    // if (isHorizontal) {
+    //   [xAxis, yAxis] = [yAxis, xAxis];
+    // }
+
+    // parse line series
     const series: (LineSeriesOption | BarSeriesOption)[] = [];
-    for (let i = lineId; i < this._lines.length; i++) {
-      const line = this._lines[i].trim();
-      // Line should be like: "line" [1, 2, 3]
-      for (const type of xySeriesTypes) {
-        if (line.startsWith(type)) {
-          const dataStr = line.substring(type.length).trim();
-          try {
-            let data = JSON.parse(dataStr);
+    seriesLines.forEach((line, index) => {
+      const config: LineSeriesOption | BarSeriesOption = {
+        type: line.type,
+      };
 
-            const valueAxis = isHorizontal ? xAxis : yAxis;
-            if (valueAxis && valueAxis.type === 'category') {
-              throw new Error('Category axis is not supported for value axis.');
-            }
-
-            // Case 1: xAxis: null, yAxis: any
-            // -> xAxis: value axis with min(1) and max(data.length),
-            // -> yAxis: value axis without/with min and max
-            // -> data: [[1, data[0]], ... [data.length, data[data.length - 1]]]
-            if (!xAxis) {
-              data = convert2dData(1, data.length, data, isHorizontal);
-            }
-            // Case 2: xAxis: value axis with min and max, yAxis: any
-            // -> xAxis: value axis with min and max,
-            // -> yAxis: value axis without/with min and max
-            // -> data: [[xAxis.min, data[0]], ... [xAxis.max, data[data.length - 1]]]
-            else if (xAxis && xAxis.max != null && xAxis.min != null) {
-              data = convert2dData(xAxis.min, xAxis.max, data, isHorizontal);
-            }
-            // Case 3: xAxis: category, yAxis: null
-            // -> xAxis: category axis
-            // -> yAxis: value axis
-            // -> data: data (not changed)
-
-            series.push({
-              type: type as 'line' | 'bar',
-              data,
-            });
-          } catch (e) {
-            console.error(`Error parsing data for ${type}: ${dataStr}`, e);
-          }
-        }
+      // some line series may contain title, like: line "Spend" [1.0, 3.0, 5.0]
+      const nameRe = /^(line|bar) "([^"]*)"/.exec(line.str);
+      const name = nameRe ? nameRe[2] : undefined;
+      if (name) {
+        config.name = name;
+      } else if (legends[index]) {
+        config.name = legends[index];
       }
-    }
+
+      // parse array
+      const dataRe = /\[.*?\]/.exec(line.str);
+      const data = dataRe ? JSON.parse(dataRe[0].replace(/None/g, 'null')) : [];
+      config.data = data;
+
+      series.push(config);
+    });
 
     return {
+      title,
       xAxis: xAxis || { type: 'value' },
-      yAxis: yAxis || { type: 'value' },
+      yAxis:
+        yAxis.length > 0
+          ? yAxis.map((i) => {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { key, ...other } = i!;
+              return other;
+            })
+          : { type: 'value' },
       series,
     };
   }

@@ -64,3 +64,30 @@ export function convert2dData(
   }
   return result;
 }
+
+/**
+ * Title line can be:
+ * e.g. title "Daily Advertising Performance"
+ * @param str title line
+ */
+export const parseTitle = (str: string) => {
+  const titleRe = /^\s*title\s*"([^"]*)"\s*$/.exec(str);
+  return titleRe ? titleRe[1] : undefined;
+};
+
+/**
+ * Legend line can be:
+ * e.g. legend "Ads" "Sales" "Revenue"
+ * @param str legend line
+ */
+export const parseLegend = (str: string) => {
+  const regex = /"([^"]*)"/g;
+  const matches = [];
+  let match;
+
+  while ((match = regex.exec(str)) !== null) {
+    matches.push(match[1]);
+  }
+
+  return matches;
+};
