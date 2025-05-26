@@ -5,7 +5,7 @@ import type {
   TitleComponentOption,
 } from 'echarts';
 import { parseAxis } from '../../base/parseAxis';
-import { parseLegend, parseTitle } from '../../base/util';
+import { parseTitle } from '../../base/util';
 import { BaseChart } from '../../base/BaseChart';
 
 // mermaid xychart code line type
@@ -15,7 +15,6 @@ enum XYChartLineType {
   yAxis = 'y-axis',
   line = 'line',
   bar = 'bar',
-  legend = 'legend',
 }
 
 export class XYChart extends BaseChart {
@@ -24,18 +23,11 @@ export class XYChart extends BaseChart {
     let lineId = 0;
     let xAxis;
     const yAxis = [];
-    // let isHorizontal = false;
     const seriesLines: { type: 'line' | 'bar'; str: string }[] = [];
-    let legends: string[] = [];
 
     // parse lines
     for (; lineId < this._lines.length; lineId++) {
       const line = this._lines[lineId].trim();
-
-      // if (line.indexOf('horizontal') > 0) {
-      //   isHorizontal = true;
-      //   continue;09
-      // }
 
       const lineType = line.split(' ')[0];
       switch (lineType) {
@@ -57,32 +49,30 @@ export class XYChart extends BaseChart {
         case XYChartLineType.line:
           seriesLines.push({ type: 'line', str: line });
           break;
-        case XYChartLineType.legend:
-          legends = parseLegend(line);
-          break;
       }
     }
 
-    // // if horizontal, swap xAxis and yAxis
-    // if (isHorizontal) {
-    //   [xAxis, yAxis] = [yAxis, xAxis];
-    // }
-
     // parse line series
-    const series: (LineSeriesOption | BarSeriesOption)[] = [];
-    seriesLines.forEach((line, index) => {
-      const config: LineSeriesOption | BarSeriesOption = {
+    type SeriesOtherParams = { numberType?: string; currency?: string };
+    const series: (LineSeriesOption | BarSeriesOption) & SeriesOtherParams[] =
+      [];
+    seriesLines.forEach((line) => {
+      const config: (LineSeriesOption | BarSeriesOption) & SeriesOtherParams = {
         type: line.type,
       };
 
-      // some line series may contain title, like: line "Spend" [1.0, 3.0, 5.0]
-      const nameRe = /^(line|bar) "([^"]*)"/.exec(line.str);
-      const name = nameRe ? nameRe[2] : undefined;
-      if (name) {
-        config.name = name;
-      } else if (legends[index]) {
-        config.name = legends[index];
+      const regex = /"([^"]*)"/g;
+      let match;
+      const matchResult: string[] = [];
+      while ((match = regex.exec(line.str)) !== null) {
+        matchResult.push(match[1]);
       }
+      const [name, yIndex, numberType, currency] = matchResult;
+
+      config.name = name;
+      config.yAxisIndex = Number(yIndex.replace('y: ', ''));
+      config.numberType = numberType;
+      config.currency = currency;
 
       // parse array
       const dataRe = /\[.*?\]/.exec(line.str);

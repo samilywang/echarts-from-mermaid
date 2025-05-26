@@ -7,6 +7,8 @@ export interface AxisDefinition {
   min?: number;
   max?: number;
   name?: string;
+  numberType?: string;
+  currency?: string;
 }
 
 const axisKeys = ['x', 'y'] as const;
@@ -24,25 +26,15 @@ export function parseAxis(line: string): AxisDefinition | null {
     return null;
   }
 
-  /**
-   * Axis line can contain title and data
-   * x-axis [mon, tues, wed, thur, fri, sat, sun]
-   * y-axis "Time trained (minutes)" 0 --> 300
-   */
-  const rest = line.substring((key + '-axis').length).trim();
-  const titleRe = /^\s*"([^"]*)"\s+/.exec(rest);
-  const title = titleRe ? titleRe[1] : undefined;
-  const data = titleRe ? rest.substring(titleRe[0].length) : rest;
-
-  const arrayResult = parseArray(data);
+  const [, title, numberType, currency, ...data] = line.split(' ');
+  const arrayResult = parseArray(data.join(' '));
   const result: AxisDefinition = {
     key,
+    name: title.replace(/^"|"$/g, ''),
+    numberType: numberType.replace(/^"|"$/g, ''),
+    currency: currency.replace(/^"|"$/g, ''),
     ...arrayResult,
   };
-
-  if (title) {
-    result.name = title;
-  }
 
   return result;
 }
