@@ -26,7 +26,9 @@ export function parseAxis(line: string): AxisDefinition | null {
     return null;
   }
 
-  const [, title, numberType, currency, ...data] = line.split(' ');
+  const [, title, numberType, currency, ...data] =
+    line.match(/(?:[^\s"]|"[^"]*")+/g) || [];
+
   const arrayResult = parseArray(data.join(' '));
   const result: AxisDefinition = {
     key,
