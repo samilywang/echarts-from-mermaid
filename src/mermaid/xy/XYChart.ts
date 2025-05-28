@@ -22,41 +22,18 @@ export class XYChart extends BaseChart {
     let title: TitleComponentOption | undefined;
     let lineId = 0;
     let xAxis;
+    let lastYAxisIndex = -1;
     const yAxis = [];
-    const seriesLines: { type: 'line' | 'bar'; str: string }[] = [];
 
-    // parse lines
-    for (; lineId < this._lines.length; lineId++) {
-      const line = this._lines[lineId].trim();
-
-      const lineType = line.split(' ')[0];
-      switch (lineType) {
-        case XYChartLineType.title:
-          title = {
-            show: false,
-            text: parseTitle(line),
-          };
-          break;
-        case XYChartLineType.xAxis:
-          xAxis = parseAxis(line);
-          break;
-        case XYChartLineType.yAxis:
-          yAxis.push(parseAxis(line));
-          break;
-        case XYChartLineType.bar:
-          seriesLines.push({ type: 'bar', str: line });
-          break;
-        case XYChartLineType.line:
-          seriesLines.push({ type: 'line', str: line });
-          break;
-      }
-    }
-
-    // parse line series
+    // parse series
     type SeriesOtherParams = { numberType?: string; currency?: string };
     const series: (LineSeriesOption | BarSeriesOption) & SeriesOtherParams[] =
       [];
-    seriesLines.forEach((line) => {
+    const parseSeries = (line: {
+      type: 'bar' | 'line';
+      str: string;
+      lastYAxisIndex: number;
+    }) => {
       const config: (LineSeriesOption | BarSeriesOption) & SeriesOtherParams = {
         type: line.type,
       };
@@ -70,7 +47,12 @@ export class XYChart extends BaseChart {
       const [name, yIndex, numberType, currency] = matchResult;
 
       config.name = name;
-      config.yAxisIndex = Number(yIndex.replace('y: ', ''));
+      config.yAxisIndex = yIndex
+        ? Number(yIndex.replace('y: ', ''))
+        : undefined;
+      if (!config.yAxisIndex && lastYAxisIndex >= 0) {
+        config.yAxisIndex = lastYAxisIndex;
+      }
       config.numberType = numberType;
       config.currency = currency;
 
@@ -80,7 +62,39 @@ export class XYChart extends BaseChart {
       config.data = data;
 
       series.push(config);
-    });
+    };
+
+    // parse lines
+    for (; lineId < this._lines.length; lineId++) {
+      const line = this._lines[lineId].trim();
+
+      const lineType = line.split(' ')[0];
+      switch (lineType) {
+        case XYChartLineType.title:
+          title = {
+            show: false,
+            text: parseTitle(line),
+          };
+          lastYAxisIndex = -1;
+          break;
+        case XYChartLineType.xAxis:
+          xAxis = parseAxis(line);
+          lastYAxisIndex = -1;
+          break;
+        case XYChartLineType.yAxis:
+          yAxis.push(parseAxis(line));
+          lastYAxisIndex = yAxis.length - 1;
+          break;
+        case XYChartLineType.bar:
+          parseSeries({ type: 'bar', str: line, lastYAxisIndex });
+          lastYAxisIndex = -1;
+          break;
+        case XYChartLineType.line:
+          parseSeries({ type: 'line', str: line, lastYAxisIndex });
+          lastYAxisIndex = -1;
+          break;
+      }
+    }
 
     return {
       title,
