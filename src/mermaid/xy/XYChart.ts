@@ -50,7 +50,7 @@ export class XYChart extends BaseChart {
       config.yAxisIndex = yIndex
         ? Number(yIndex.replace('y: ', ''))
         : undefined;
-      if (!config.yAxisIndex && lastYAxisIndex >= 0) {
+      if (config.yAxisIndex === undefined && lastYAxisIndex >= 0) {
         config.yAxisIndex = lastYAxisIndex;
       }
       config.numberType = numberType;
