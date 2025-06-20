@@ -68,10 +68,16 @@ export function convert2dData(
 /**
  * Title line can be:
  * e.g. title "Daily Advertising Performance"
+ * e.g. title Daily Advertising Performance
  * @param str title line
  */
 export const parseTitle = (str: string) => {
-  const titleRe = /^\s*title\s*"([^"]*)"\s*$/.exec(str);
+  let titleRe = /^\s*title\s*"([^"]*)"\s*$/.exec(str);
+  if (titleRe) {
+    return titleRe[1];
+  }
+
+  titleRe = /^\s*title\s*([^"]*)\s*$/.exec(str);
   return titleRe ? titleRe[1] : undefined;
 };
 
