@@ -57,7 +57,7 @@ export class XYChart extends BaseChart {
       config.currency = currency;
 
       // parse array
-      const dataRe = /\[.*?\]/.exec(line.str);
+      const dataRe = /(?<!")[^"[\]]*\[([^"]*)\][^"[\]]*(?!")/.exec(line.str);
       const data = dataRe ? JSON.parse(dataRe[0].replace(/None/g, 'null')) : [];
       config.data = data;
 
