@@ -47,9 +47,7 @@ export class XYChart extends BaseChart {
       const [name, yIndex, numberType, currency] = matchResult;
 
       config.name = name;
-      config.yAxisIndex = yIndex
-        ? Number(yIndex.replace('y: ', ''))
-        : undefined;
+      config.yAxisIndex = yIndex ? Number(yIndex.replace('y:', '')) : undefined;
       if (config.yAxisIndex === undefined && lastYAxisIndex >= 0) {
         config.yAxisIndex = lastYAxisIndex;
       }
